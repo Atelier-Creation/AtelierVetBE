@@ -11,6 +11,11 @@ export const createAppointmentSchema = z.object({
     .string({ required_error: "Client ID is required" })
     .uuid("Invalid UUID format"),
 
+  pet_id: z
+    .string()
+    .uuid("Invalid UUID format")
+    .optional(),
+
   doctor_id: z
     .string({ required_error: "Doctor ID is required" })
     .uuid("Invalid UUID format"),

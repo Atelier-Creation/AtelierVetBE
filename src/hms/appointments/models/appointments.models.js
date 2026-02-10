@@ -19,6 +19,16 @@ const Appointments = sequelize.define(
             onUpdate: "CASCADE",
             onDelete: "CASCADE",
         },
+        pet_id: {
+            type: DataTypes.UUID,
+            allowNull: true,
+            references: {
+                model: "pets",
+                key: "id",
+            },
+            onUpdate: "CASCADE",
+            onDelete: "CASCADE",
+        },
         doctor_id: {
             type: DataTypes.UUID,
             allowNull: false,
