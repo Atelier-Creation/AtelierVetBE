@@ -1,13 +1,13 @@
 import { sequelize } from "../../../db/index.js";
-import PatientsContacts from "../models/patientcontacts.models.js";
+import ClientContacts from "../models/clientcontacts.models.js";
 
-const patientContactsService = {
+const clientContactsService = {
   async create(data) {
-    if (!data || !data.patient_id || !data.name || !data.phone || !data.relationship) {
-      throw new Error("patient_id, name, phone, and relationship are required");
+    if (!data || !data.client_id || !data.name || !data.phone || !data.relationship) {
+      throw new Error("client_id, name, phone, and relationship are required");
     }
 
-    const contact = await PatientsContacts.create(data);
+    const contact = await ClientContacts.create(data);
     return contact;
   },
 
@@ -19,7 +19,7 @@ const patientContactsService = {
       is_active,
       sort_by = "createdAt",
       sort_order = "DESC",
-      patient_id, // optional filter by patient
+      client_id, // optional filter by client
     } = options;
 
     const offset = (page - 1) * limit;
@@ -33,11 +33,11 @@ const patientContactsService = {
       where.is_active = is_active;
     }
 
-    if (patient_id) {
-      where.patient_id = patient_id;
+    if (client_id) {
+      where.client_id = client_id;
     }
 
-    const { count, rows } = await PatientsContacts.findAndCountAll({
+    const { count, rows } = await ClientContacts.findAndCountAll({
       where,
       offset,
       limit: Number(limit),
@@ -53,13 +53,13 @@ const patientContactsService = {
   },
 
   async getById(id) {
-    const contact = await PatientsContacts.findByPk(id);
+    const contact = await ClientContacts.findByPk(id);
     if (!contact) throw new Error("Contact not found");
     return contact;
   },
 
   async update(id, data) {
-    const contact = await PatientsContacts.findByPk(id);
+    const contact = await ClientContacts.findByPk(id);
     if (!contact) throw new Error("Contact not found");
 
     await contact.update(data);
@@ -67,7 +67,7 @@ const patientContactsService = {
   },
 
   async delete(id, userInfo = {}) {
-    const contact = await PatientsContacts.findByPk(id);
+    const contact = await ClientContacts.findByPk(id);
     if (!contact) throw new Error("Contact not found");
 
     await contact.update({
@@ -81,7 +81,7 @@ const patientContactsService = {
   },
 
   async restore(id, userInfo = {}) {
-    const contact = await PatientsContacts.findByPk(id);
+    const contact = await ClientContacts.findByPk(id);
     if (!contact) throw new Error("Contact not found");
 
     await contact.update({
@@ -98,4 +98,4 @@ const patientContactsService = {
   },
 };
 
-export default patientContactsService;
+export default clientContactsService;

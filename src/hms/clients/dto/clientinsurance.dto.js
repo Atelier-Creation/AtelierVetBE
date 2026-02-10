@@ -1,9 +1,9 @@
 import { z } from "zod";
 
-// ✅ Create Patient Insurance Schema
-export const createPatientInsuranceSchema = z.object({
-  patient_id: z
-    .string({ required_error: "Patient ID is required" })
+// ✅ Create Client Insurance Schema
+export const createClientInsuranceSchema = z.object({
+  client_id: z
+    .string({ required_error: "Client ID is required" })
     .uuid("Invalid UUID format"),
 
   provider_name: z
@@ -37,8 +37,8 @@ export const createPatientInsuranceSchema = z.object({
   created_by_email: z.string().email().optional(),
 });
 
-// ✅ Update Patient Insurance Schema
-export const updatePatientInsuranceSchema = z.object({
+// ✅ Update Client Insurance Schema
+export const updateClientInsuranceSchema = z.object({
   provider_name: z.string().min(2).max(100).optional(),
   policy_number: z.string().min(2).max(100).optional(),
   coverage_details: z.string().min(5).max(255).optional(),

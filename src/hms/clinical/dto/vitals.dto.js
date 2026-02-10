@@ -6,7 +6,7 @@ export const createVitalsSchema = z.object({
     .string({ required_error: "Encounter ID is required" })
     .uuid("Invalid UUID format"),
 
-  patient_id: z
+  client_id: z
     .string()
     .uuid("Invalid UUID format")
     .optional(), // optional, auto-filled from encounter
@@ -35,7 +35,11 @@ export const createVitalsSchema = z.object({
 // ✅ Update Vitals Schema
 export const updateVitalsSchema = z.object({
   encounter_id: z.string().uuid().optional(),
-  patient_id: z.string().uuid().optional(),
+  client_id: z
+    .string()
+    .uuid("Invalid UUID format")
+    .optional(),
+
   measured_at: z.string().optional(),
 
   height: z.number().positive().optional(),

@@ -7,8 +7,8 @@ const sourceEnum = ["Online", "phone", "Offline"];
 
 // ✅ Create Appointment Schema
 export const createAppointmentSchema = z.object({
-  patient_id: z
-    .string({ required_error: "Patient ID is required" })
+  client_id: z
+    .string({ required_error: "Client ID is required" })
     .uuid("Invalid UUID format"),
 
   doctor_id: z

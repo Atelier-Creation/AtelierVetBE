@@ -10,7 +10,7 @@ const User = sequelize.define("User", {
     primaryKey: true,
   },
   role:{
-    type: DataTypes.ENUM('Super Admin', 'Admin', 'Doctor', 'Patient', 'Nurse', 'Receptionist', 'Pharmacist', 'Lab Technician', 'Accountant' ),
+    type: DataTypes.ENUM('Super Admin', 'Admin', 'Doctor', 'Client', 'Nurse', 'Receptionist', 'Pharmacist', 'Lab Technician', 'Accountant', 'Client' ),
     allowNull: false
   },
   username: {

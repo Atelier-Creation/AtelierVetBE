@@ -1,41 +1,70 @@
 import { sequelize } from "../../../db/index.js";
 import { DataTypes } from "sequelize";
 
-const PatientsContacts = sequelize.define(
-    "PatientsContacts",
+const Client = sequelize.define(
+    "Client",
     {
         id: {
             type: DataTypes.UUID,
             defaultValue: DataTypes.UUIDV4,
             primaryKey: true,
         },
-        patient_id: {
+        first_name: {
+            type: DataTypes.STRING(100),
+            allowNull: false,
+        },
+        last_name: {
+            type: DataTypes.STRING(100),
+            allowNull: false,
+        },
+        client_code: {
+            type: DataTypes.STRING(100),
+            allowNull: false,
+            unique: true,
+        },
+        user_id: {
             type: DataTypes.UUID,
             allowNull: false,
             references: {
-                model: "patients",
+                model: "endusers",
                 key: "id",
             },
             onUpdate: "CASCADE",
             onDelete: "CASCADE",
         },
-        name: {
-            type: DataTypes.STRING(100),
-            allowNull: false,
-        },
         email: {
             type: DataTypes.STRING(100),
-            allowNull: true,
+            allowNull: false,
         },
         phone: {
             type: DataTypes.STRING(15),
+            allowNull: true,
+        },
+        gender:{
+            type: DataTypes.ENUM('Male', 'Female'),
             allowNull: false,
         },
-        relationship: {
-            type: DataTypes.STRING(100),
+        dob:{
+            type: DataTypes.DATE,
             allowNull: false,
         },
-        address: {
+        age: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+        },
+        address:{
+            type: DataTypes.STRING(255),
+            allowNull: false,
+        },
+        blood_group:{
+            type: DataTypes.ENUM('A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'),
+            allowNull: false,
+        },
+        marital_status:{
+            type: DataTypes.ENUM('Single', 'Married'),
+            allowNull: false,
+        },
+        notes:{
             type: DataTypes.STRING(255),
             allowNull: true,
         },
@@ -57,8 +86,9 @@ const PatientsContacts = sequelize.define(
         deleted_by_email: { type: DataTypes.STRING, allowNull: true },
     },
     {
-        tableName: "patient_contacts",
+        tableName: "clients",
         timestamps: true,
     }
 );
-export default PatientsContacts;
+
+export default Client;

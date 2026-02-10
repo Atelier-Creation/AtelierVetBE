@@ -1,48 +1,43 @@
 import { sequelize } from "../../../db/index.js";
 import { DataTypes } from "sequelize";
 
-const PatientInsurance = sequelize.define(
-    "PatientInsurance",
+const ClientContacts = sequelize.define(
+    "ClientContacts",
     {
         id: {
             type: DataTypes.UUID,
             defaultValue: DataTypes.UUIDV4,
             primaryKey: true,
         },
-        patient_id: {
+        client_id: {
             type: DataTypes.UUID,
             allowNull: false,
             references: {
-                model: "patients",
+                model: "clients",
                 key: "id",
             },
             onUpdate: "CASCADE",
             onDelete: "CASCADE",
         },
-        provider_name: {
+        name: {
             type: DataTypes.STRING(100),
             allowNull: false,
         },
-        policy_number: {
+        email: {
+            type: DataTypes.STRING(100),
+            allowNull: true,
+        },
+        phone: {
+            type: DataTypes.STRING(15),
+            allowNull: false,
+        },
+        relationship: {
             type: DataTypes.STRING(100),
             allowNull: false,
         },
-        coverage_details: {
+        address: {
             type: DataTypes.STRING(255),
-            allowNull: false,
-        },
-        valid_from:{
-            type: DataTypes.DATE,
-            allowNull: false,
-        },
-        valid_to:{
-            type: DataTypes.DATE,
-            allowNull: false,
-        },
-        is_primary: {
-            type: DataTypes.BOOLEAN,
-            defaultValue: false,
-            allowNull: false,
+            allowNull: true,
         },
         is_active: {
             type: DataTypes.BOOLEAN,
@@ -62,9 +57,8 @@ const PatientInsurance = sequelize.define(
         deleted_by_email: { type: DataTypes.STRING, allowNull: true },
     },
     {
-        tableName: "patient_insurance",
+        tableName: "client_contacts",
         timestamps: true,
     }
 );
-
-export default PatientInsurance;
+export default ClientContacts;

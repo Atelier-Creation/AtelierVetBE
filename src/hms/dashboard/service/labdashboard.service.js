@@ -1,6 +1,6 @@
 import { Op } from "sequelize";
 import LabTestOrders from "../../laboratory/models/labtestorders.models.js";
-import Patient from "../../patients/models/patients.models.js";
+import Client from "../../clients/models/clients.models.js";
 import Encounter from "../../clinical/models/encounters.models.js";
 import LabTestOrderItems from "../../laboratory/models/labtestordersiteams.models.js";
 import LabTestsMaster from "../../laboratory/models/labtestsmaster.models.js";
@@ -21,7 +21,7 @@ const labDashboardService = {
                 order: [["createdAt", "DESC"]],
                 limit: 5,
                 include: [
-                    { model: Patient, as: "patient" },
+                    { model: Client, as: "client" },
                     { model: Encounter, as: "encounter" },
                     {
                         model: LabTestOrderItems,

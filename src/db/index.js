@@ -12,7 +12,7 @@
 
 import { Sequelize } from "sequelize";
 
-const sequelize = new Sequelize("mysql://u265115582_gnana:Parthiban2025@82.112.229.246/u265115582_HMS");
+const sequelize = new Sequelize("mysql://root:mpiahfLGTMMHCypsApxsLStLgVuWPKUT@turntable.proxy.rlwy.net:34647/VHMS");
 
 // const sequelize = new Sequelize("mysql://root:root@localhost/hms");
 

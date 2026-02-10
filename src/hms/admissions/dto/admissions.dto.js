@@ -2,9 +2,9 @@ import { z } from "zod";
 
 // ✅ Create Admission Schema
 export const createAdmissionSchema = z.object({
-  patient_id: z
-    .string({ required_error: "Patient ID is required" })
-    .uuid("Invalid Patient ID format"),
+  client_id: z
+    .string({ required_error: "Client ID is required" })
+    .uuid("Invalid Client ID format"),
 
   admission_date: z
     .string()

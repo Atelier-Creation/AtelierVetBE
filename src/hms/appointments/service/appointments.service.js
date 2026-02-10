@@ -2,7 +2,7 @@ import { sequelize } from "../../../db/index.js";
 import Appointments from "../models/appointments.models.js";
 import DoctorSchedules from "../models/doctorschedules.models.js";
 import Doctor from "../../staff/models/doctor.models.js";
-import Patient from "../../patients/models/patients.models.js";
+import Client from "../../clients/models/clients.models.js";
 import StaffProfile from "../../staff/models/staffprofiles.models.js";
 import Department from "../../hospital/models/department.models.js";
 import { Op } from "sequelize";
@@ -28,7 +28,7 @@ const appointmentsService = {
   async create(data) {
     // Required fields
     const requiredFields = [
-      "patient_id",
+      "client_id",
       "doctor_id",
       "scheduled_at",
       "scheduled_time",
@@ -112,7 +112,7 @@ const appointmentsService = {
       search = "",
       status,
       doctor_id,
-      patient_id,
+      client_id,
       start_date,
       end_date,
       sort_by = "createdAt",
@@ -131,7 +131,7 @@ const appointmentsService = {
 
     if (status) where.status = status;
     if (doctor_id) where.doctor_id = doctor_id;
-    if (patient_id) where.patient_id = patient_id;
+    if (client_id) where.client_id = client_id;
     if (start_date && end_date)
       where.scheduled_at = { [Op.between]: [new Date(start_date), new Date(end_date)] };
 
@@ -142,7 +142,7 @@ const appointmentsService = {
       order: [[sort_by, sort_order]],
       include: [
         { model: Doctor, as: "doctor" },
-        { model: Patient, as: "patient" },
+        { model: Client, as: "client" },
       ],
     });
 
@@ -161,7 +161,7 @@ const appointmentsService = {
     const appointment = await Appointments.findByPk(id, {
       include: [
         { model: Doctor, as: "doctor" },
-        { model: Patient, as: "patient" },
+        { model: Client, as: "client" },
       ],
     });
     if (!appointment) throw new Error("Appointment not found");
@@ -332,9 +332,9 @@ const appointmentsService = {
       },
       include: [
         {
-          model: Patient,
-          as: "patient",
-          attributes: ["id", "first_name", "last_name", "patient_code"],
+          model: Client,
+          as: "client",
+          attributes: ["id", "first_name", "last_name", "client_code"],
         },
       ],
       order: [["scheduled_time", "ASC"]],

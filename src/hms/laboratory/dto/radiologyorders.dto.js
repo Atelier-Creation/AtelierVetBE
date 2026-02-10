@@ -6,8 +6,8 @@ const priorityEnum = ["normal", "urgent"];
 
 // ✅ Schema for creating a Radiology Order
 export const createRadiologyOrderSchema = z.object({
-  patient_id: z
-    .string({ required_error: "Patient ID is required" })
+  client_id: z
+    .string({ required_error: "Client ID is required" })
     .uuid("Invalid UUID format").optional(),
 
   encounter_id: z

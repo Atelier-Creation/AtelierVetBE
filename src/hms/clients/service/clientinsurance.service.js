@@ -1,15 +1,15 @@
 import { sequelize } from "../../../db/index.js";
-import PatientInsurance from "../models/patientinsurance.models.js";
-import Patients from "../models/patients.models.js";
+import ClientInsurance from "../models/clientinsurance.models.js";
+import Clients from "../models/clients.models.js";
 
-const patientInsuranceService = {
+const clientInsuranceService = {
   /**
-   * ✅ Create patient insurance
+   * ✅ Create client insurance
    */
   async create(data) {
     if (
       !data ||
-      !data.patient_id ||
+      !data.client_id ||
       !data.provider_name ||
       !data.policy_number ||
       !data.coverage_details ||
@@ -17,16 +17,16 @@ const patientInsuranceService = {
       !data.valid_to
     ) {
       throw new Error(
-        "patient_id, provider_name, policy_number, coverage_details, valid_from, and valid_to are required"
+        "client_id, provider_name, policy_number, coverage_details, valid_from, and valid_to are required"
       );
     }
 
-    const insurance = await PatientInsurance.create(data);
+    const insurance = await ClientInsurance.create(data);
     return insurance;
   },
 
   /**
-   * ✅ Get all patient insurance records
+   * ✅ Get all client insurance records
    */
   async getAll(options = {}) {
     const {
@@ -36,7 +36,7 @@ const patientInsuranceService = {
       is_active,
       sort_by = "createdAt",
       sort_order = "DESC",
-      patient_id, // optional filter by patient
+      client_id, // optional filter by client
     } = options;
 
     const offset = (page - 1) * limit;
@@ -50,20 +50,20 @@ const patientInsuranceService = {
       where.is_active = is_active;
     }
 
-    if (patient_id) {
-      where.patient_id = patient_id;
+    if (client_id) {
+      where.client_id = client_id;
     }
 
-    const { count, rows } = await PatientInsurance.findAndCountAll({
+    const { count, rows } = await ClientInsurance.findAndCountAll({
       where,
       offset,
       limit: Number(limit),
       order: [[sort_by, sort_order]],
       include: [
         {
-          model: Patients,
-          as: "patient",
-          attributes: ["id", "first_name", "last_name", "patient_code", "email", "phone"],
+          model: Clients,
+          as: "client",
+          attributes: ["id", "first_name", "last_name", "client_code", "email", "phone"],
         },
       ],
     });
@@ -80,17 +80,17 @@ const patientInsuranceService = {
    * ✅ Get insurance by ID
    */
   async getById(id) {
-    const insurance = await PatientInsurance.findByPk(id, {
+    const insurance = await ClientInsurance.findByPk(id, {
       include: [
         {
-          model: Patients,
-          as: "patient",
-          attributes: ["id", "first_name", "last_name", "patient_code", "email", "phone"],
+          model: Clients,
+          as: "client",
+          attributes: ["id", "first_name", "last_name", "client_code", "email", "phone"],
         },
       ],
     });
 
-    if (!insurance) throw new Error("Patient insurance not found");
+    if (!insurance) throw new Error("Client insurance not found");
     return insurance;
   },
 
@@ -98,8 +98,8 @@ const patientInsuranceService = {
    * ✅ Update insurance
    */
   async update(id, data) {
-    const insurance = await PatientInsurance.findByPk(id);
-    if (!insurance) throw new Error("Patient insurance not found");
+    const insurance = await ClientInsurance.findByPk(id);
+    if (!insurance) throw new Error("Client insurance not found");
 
     await insurance.update(data);
     return insurance;
@@ -109,8 +109,8 @@ const patientInsuranceService = {
    * ✅ Soft delete insurance
    */
   async delete(id, userInfo = {}) {
-    const insurance = await PatientInsurance.findByPk(id);
-    if (!insurance) throw new Error("Patient insurance not found");
+    const insurance = await ClientInsurance.findByPk(id);
+    if (!insurance) throw new Error("Client insurance not found");
 
     await insurance.update({
       is_active: false,
@@ -119,15 +119,15 @@ const patientInsuranceService = {
       deleted_by_email: userInfo.email || null,
     });
 
-    return { message: "Patient insurance deleted successfully" };
+    return { message: "Client insurance deleted successfully" };
   },
 
   /**
    * ✅ Restore soft-deleted insurance
    */
   async restore(id, userInfo = {}) {
-    const insurance = await PatientInsurance.findByPk(id);
-    if (!insurance) throw new Error("Patient insurance not found");
+    const insurance = await ClientInsurance.findByPk(id);
+    if (!insurance) throw new Error("Client insurance not found");
 
     await insurance.update({
       is_active: true,
@@ -139,8 +139,8 @@ const patientInsuranceService = {
       updated_by_email: userInfo.email || null,
     });
 
-    return { message: "Patient insurance restored successfully" };
+    return { message: "Client insurance restored successfully" };
   },
 };
 
-export default patientInsuranceService;
+export default clientInsuranceService;

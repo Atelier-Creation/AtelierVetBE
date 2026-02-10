@@ -1,86 +1,74 @@
-import { Op } from "sequelize";
-import { v4 as uuidv4 } from "uuid";
+import { sequelize } from "../../../db/index.js";
 import Vitals from "../models/vitals.models.js";
 import Encounters from "../models/encounters.models.js";
-import Patient from "../../patients/models/patients.models.js";
+import Client from "../../clients/models/clients.models.js";
 
 const vitalsService = {
   /**
-   * ✅ Create Vitals
+   * ✅ Create vitals
    */
   async create(data, user) {
     try {
-      // ✅ If encounter_id is provided, fetch patient_id automatically
+      // ✅ If encounter_id is provided, fetch client_id automatically
       if (data.encounter_id) {
         const encounter = await Encounters.findOne({
           where: { id: data.encounter_id },
-          attributes: ["id", "patient_id", "status"],
+          attributes: ["id", "client_id", "status"],
         });
 
         if (!encounter) {
-          throw new Error("Invalid encounter_id — encounter not found");
+          throw new Error("Encounter not found");
         }
 
-        // ✅ Check encounter status
-        if (encounter.status !== "Open") {
-          throw new Error(
-            `Cannot add vitals. Encounter is '${encounter.status}'`
-          );
+        if (encounter.status === "Closed") {
+          throw new Error("Cannot add vitals to a closed encounter");
         }
 
-        // ✅ Check if vitals already exist for this encounter
-        const existingVitals = await Vitals.findOne({
-          where: { encounter_id: data.encounter_id },
-        });
-
-        if (existingVitals) {
-          throw new Error(
-            "Vitals for this encounter already exist"
-          );
+        if (encounter.status === "Cancelled") {
+          throw new Error("Cannot add vitals to a cancelled encounter");
         }
 
-        // Auto-fill patient_id
-        data.patient_id = encounter.patient_id;
+        // Auto-fill client_id
+        data.client_id = encounter.client_id;
       }
 
       // ✅ Required fields validation
-      const requiredFields = ["patient_id", "encounter_id", "temperature"];
+      const requiredFields = ["client_id", "encounter_id", "temperature"];
       for (const field of requiredFields) {
         if (!data[field]) throw new Error(`${field} is required`);
       }
 
-      // ✅ Create vitals record
+      // ✅ Create vitals
       const vitals = await Vitals.create({
-        id: uuidv4(),
         ...data,
-        recorded_by: user?.id || null,
+        measured_at: data.measured_at || new Date(),
         created_by: user?.id || null,
-        created_by_name: user?.username || null,
+        created_by_name: user?.name || null,
         created_by_email: user?.email || null,
       });
 
       return vitals;
     } catch (error) {
-      console.error("❌ Error creating vitals:", error.message);
-      throw error;
+      console.error("❌ Error creating vitals:", error);
+      throw new Error(error.message || "Failed to create vitals");
     }
   },
 
   /**
-   * ✅ Get all vitals
+   * ✅ Get all vitals (with filters & pagination)
    */
   async getAll(options = {}) {
     const {
       page = 1,
       limit = 10,
-      patient_id,
+      client_id,
       encounter_id,
       sort_by = "createdAt",
       sort_order = "DESC",
     } = options;
 
     const where = {};
-    if (patient_id) where.patient_id = patient_id;
+    if (client_id) where.client_id = client_id;
     if (encounter_id) where.encounter_id = encounter_id;
 
     const offset = (page - 1) * limit;
@@ -89,9 +77,9 @@ const vitalsService = {
       where,
       include: [
         {
-          model: Patient,
-          as: "patient",
-          attributes: ["id", "first_name", "last_name", "patient_code"],
+          model: Client,
+          as: "client",
+          attributes: ["id", "first_name", "last_name", "client_code"],
         },
         {
           model: Encounters,
@@ -119,9 +107,9 @@ const vitalsService = {
     const vitals = await Vitals.findByPk(id, {
       include: [
         {
-          model: Patient,
-          as: "patient",
-          attributes: ["id", "first_name", "last_name", "patient_code"],
+          model: Client,
+          as: "client",
+          attributes: ["id", "first_name", "last_name", "client_code"],
         },
         {
           model: Encounters,
@@ -142,9 +130,9 @@ const vitalsService = {
       },
       include: [
         {
-          model: Patient,
-          as: "patient",
-          attributes: ["id", "first_name", "last_name", "patient_code"],
+          model: Client,
+          as: "client",
+          attributes: ["id", "first_name", "last_name", "client_code"],
         },
         {
           model: Encounters,
@@ -158,7 +146,7 @@ const vitalsService = {
   },
 
   /**
-   * ✅ Update Vitals
+   * ✅ Update vitals
    */
   async update(id, data, user) {
     const vitals = await Vitals.findByPk(id);
@@ -167,7 +155,7 @@ const vitalsService = {
     await vitals.update({
       ...data,
       updated_by: user?.id || null,
-      updated_by_name: user?.username || null,
+      updated_by_name: user?.name || null,
       updated_by_email: user?.email || null,
     });
 
@@ -175,7 +163,7 @@ const vitalsService = {
   },
 
   /**
-   * ✅ Delete Vitals (Soft delete)
+   * ✅ Delete (Soft Delete) vitals
    */
   async delete(id, user) {
     const vitals = await Vitals.findByPk(id);
@@ -183,11 +171,9 @@ const vitalsService = {
 
     await vitals.update({
       deleted_by: user?.id || null,
-      deleted_by_name: user?.username || null,
+      deleted_by_name: user?.name || null,
       deleted_by_email: user?.email || null,
     });
-
-    await vitals.destroy(); // hard delete
 
     return { message: "Vitals deleted successfully" };
   },

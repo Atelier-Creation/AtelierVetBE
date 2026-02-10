@@ -12,11 +12,11 @@ const Encounters = sequelize.define('encounters', {
         allowNull: false,
         unique: true,
     },
-    patient_id: {
+    client_id: {
         type: DataTypes.UUID,
         allowNull: false,
         references: {
-            model: "patients",
+            model: "clients",
             key: "id",
         },
         onUpdate: "CASCADE",

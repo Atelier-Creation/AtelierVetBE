@@ -1,8 +1,8 @@
 import { z } from "zod";
 
-// ✅ Create Patient Contact Schema
-export const createPatientContactSchema = z.object({
-  patient_id: z.string({ required_error: "Patient ID is required" }).uuid("Invalid UUID format"),
+// ✅ Create Client Contact Schema
+export const createClientContactSchema = z.object({
+  client_id: z.string({ required_error: "Client ID is required" }).uuid("Invalid UUID format"),
   
   name: z
     .string({ required_error: "Contact name is required" })
@@ -29,8 +29,8 @@ export const createPatientContactSchema = z.object({
   created_by_email: z.string().email().optional(),
 });
 
-// ✅ Update Patient Contact Schema
-export const updatePatientContactSchema = z.object({
+// ✅ Update Client Contact Schema
+export const updateClientContactSchema = z.object({
   name: z.string().min(2).max(100).optional(),
   email: z.string().email().max(100).optional(),
   phone: z.string().max(15).optional(),

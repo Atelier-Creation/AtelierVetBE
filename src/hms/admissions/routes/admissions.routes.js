@@ -45,7 +45,7 @@ router.put(
 );
 
 /**
- * ✅ Discharge Patient
+ * ✅ Discharge Client
  * Roles allowed: Doctor, Admin, Super Admin
  */
 router.put(

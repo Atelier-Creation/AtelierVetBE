@@ -1,6 +1,6 @@
 import { sequelize } from "../../../db/index.js";
 import Admissions from "../models/admissions.models.js";
-import Patient from "../../patients/models/patients.models.js";
+import Client from "../../clients/models/clients.models.js";
 import Ward from "../models/wards.models.js";
 import Room from "../models/rooms.models.js";
 import Beds from "../models/beds.models.js";
@@ -15,13 +15,13 @@ const admissionService = {
   const transaction = await sequelize.transaction();
   try {
     // 🧩 Basic validations
-    if (!data.patient_id) throw new Error("patient_id is required");
+    if (!data.client_id) throw new Error("client_id is required");
     if (!data.reason) throw new Error("reason is required");
     if (!data.bed_id) throw new Error("bed_id is required");
 
-    // ✅ Check if patient exists
-    const patient = await Patient.findByPk(data.patient_id);
-    if (!patient) throw new Error("Patient not found");
+    // ✅ Check if client exists
+    const client = await Client.findByPk(data.client_id);
+    if (!client) throw new Error("Client not found");
 
     // ✅ Get bed and related room → ward
     const bed = await Beds.findByPk(data.bed_id, {
@@ -50,7 +50,7 @@ const admissionService = {
     // 🧾 Create admission record
     const admission = await Admissions.create(
       {
-        patient_id: data.patient_id,
+        client_id: data.client_id,
         admission_date: data.admission_date || new Date(),
         admitted_by: data.admitted_by,
         reason: data.reason,
@@ -103,7 +103,7 @@ const admissionService = {
       limit: Number(limit),
       order: [[sort_by, sort_order]],
       include: [
-        { model: Patient, as: "patient" },
+        { model: Client, as: "client" },
         { model: Ward, as: "ward" },
         { model: Room, as: "room" },
         { model: Beds, as: "bed" },
@@ -125,7 +125,7 @@ const admissionService = {
   async getById(id) {
     const admission = await Admissions.findByPk(id, {
       include: [
-        { model: Patient, as: "patient" },
+        { model: Client, as: "client" },
         { model: Ward, as: "ward" },
         { model: Room, as: "room" },
         { model: Beds, as: "bed" },
@@ -155,7 +155,7 @@ const admissionService = {
   },
 
   /**
-   * ✅ Discharge Patient
+   * ✅ Discharge Client
    */
   async discharge(id, dischargeData, userInfo = {}) {
     const transaction = await sequelize.transaction();
@@ -163,7 +163,7 @@ const admissionService = {
       const admission = await Admissions.findByPk(id);
       if (!admission) throw new Error("Admission not found");
       if (admission.status === "discharged")
-        throw new Error("Patient is already discharged");
+        throw new Error("Client is already discharged");
 
       const bed = await Beds.findByPk(admission.bed_id);
       if (bed) {
@@ -185,11 +185,11 @@ const admissionService = {
       );
 
       await transaction.commit();
-      return { message: "Patient discharged successfully", admission };
+      return { message: "Client discharged successfully", admission };
     } catch (error) {
       await transaction.rollback();
-      console.error("❌ Error discharging patient:", error);
-      throw new Error(error.message || "Failed to discharge patient");
+      console.error("❌ Error discharging client:", error);
+      throw new Error(error.message || "Failed to discharge client");
     }
   },
 

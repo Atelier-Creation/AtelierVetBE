@@ -1,7 +1,7 @@
 import { sequelize } from "../../../db/index.js";
 import { Op } from "sequelize";
 import RadiologyOrders from "../models/radiologyorders.models.js";
-import Patient from "../../patients/models/patients.models.js";
+import Client from "../../clients/models/clients.models.js";
 import Encounter from "../../clinical/models/encounters.models.js";
 import Doctor from "../../staff/models/doctor.models.js";
 import User from "../../../user/models/user.model.js";
@@ -14,12 +14,12 @@ const radiologyOrdersService = {
       if (!data.encounter_id) throw new Error("encounter_id is required");
       if (!data.test_name) throw new Error("test_name is required");
 
-      // 🧩 Fetch patient_id from encounter if not provided
-      if (!data.patient_id) {
+      // 🧩 Fetch client_id from encounter if not provided
+      if (!data.client_id) {
         const encounter = await Encounter.findByPk(data.encounter_id);
         console.log(encounter);
         if (!encounter) throw new Error("Encounter not found");
-        data.patient_id = encounter.patient_id;
+        data.client_id = encounter.client_id;
         data.ordered_by = encounter.doctor_id;
       }
       
@@ -32,7 +32,7 @@ const radiologyOrdersService = {
       // 🧾 Create Main Radiology Order
       const order = await RadiologyOrders.create(
         {
-          patient_id: data.patient_id,
+          client_id: data.client_id,
           encounter_id: data.encounter_id,
           ordered_by: data.ordered_by,
           test_name: data.test_name,
@@ -69,7 +69,7 @@ const radiologyOrdersService = {
       limit = 10,
       search = "",
       status,
-      patient_id,
+      client_id,
       start_date,
       end_date,
       sort_by = "createdAt",
@@ -87,7 +87,7 @@ const radiologyOrdersService = {
     }
 
     if (status) where.status = status;
-    if (patient_id) where.patient_id = patient_id;
+    if (client_id) where.client_id = client_id;
     if (start_date && end_date)
       where.test_date = { [Op.between]: [new Date(start_date), new Date(end_date)] };
 
@@ -97,7 +97,7 @@ const radiologyOrdersService = {
       limit: Number(limit),
       order: [[sort_by, sort_order]],
       include: [
-        { model: Patient, as: "patient" },
+        { model: Client, as: "client" },
         { model: Encounter, as: "encounter" },
         { model: Doctor, as: "doctor", foreignKey: "ordered_by" },
       ],
@@ -117,7 +117,7 @@ const radiologyOrdersService = {
   async getById(id) {
     const order = await RadiologyOrders.findByPk(id, {
       include: [
-        { model: Patient, as: "patient" },
+        { model: Client, as: "client" },
         { model: Encounter, as: "encounter" },
         { model: Doctor, as: "doctor", foreignKey: "ordered_by" },
       ],
@@ -128,13 +128,13 @@ const radiologyOrdersService = {
   },
 
   /**
-   * ✅ Get Radiology Orders by Patient ID
+   * ✅ Get Radiology Orders by Client ID
    */
-  async getByPatient(patient_id) {
-    if (!patient_id) throw new Error("patient_id is required");
+  async getByClient(client_id) {
+    if (!client_id) throw new Error("client_id is required");
 
     const orders = await RadiologyOrders.findAll({
-      where: { patient_id },
+      where: { client_id },
       order: [["createdAt", "DESC"]],
       include: [
         { model: Encounter, as: "encounter" },
@@ -153,7 +153,7 @@ const radiologyOrdersService = {
       where: { status: "pending" },
       order: [["createdAt", "DESC"]],
       include: [
-        { model: Patient, as: "patient" },
+        { model: Client, as: "client" },
         { model: Encounter, as: "encounter" },
         { model: Doctor, as: "doctor", foreignKey: "ordered_by" },
       ],

@@ -7,11 +7,11 @@ const RadiologyOrders = sequelize.define('radiologyorders', {
         defaultValue: DataTypes.UUIDV4,
         primaryKey: true,
     },
-    patient_id: {
+    client_id: {
         type: DataTypes.UUID,
         allowNull: false,
         references: {
-            model: "patients",
+            model: "clients",
             key: "id",
         },
         onUpdate: "CASCADE",

@@ -2,7 +2,7 @@ import { sequelize } from "../../../db/index.js";
 import { Op } from "sequelize";
 import LabTestOrders from "../models/labtestorders.models.js";
 import LabTestOrderItems from "../models/labtestordersiteams.models.js";
-import Patient from "../../patients/models/patients.models.js";
+import Client from "../../clients/models/clients.models.js";
 import Encounter from "../../clinical/models/encounters.models.js";
 import LabTestsMaster from "../models/labtestsmaster.models.js";
 import User from "../../../user/models/user.model.js";
@@ -17,10 +17,10 @@ const labTestOrdersService = {
         try {
             if (!data.encounter_id) throw new Error("encounter_id is required");
 
-            if (!data.patient_id) {
+            if (!data.client_id) {
                 const encounter = await Encounter.findByPk(data.encounter_id);
                 if (!encounter) throw new Error("Encounter not found");
-                data.patient_id = encounter.patient_id;
+                data.client_id = encounter.client_id;
             }
 
             if (!data.priority) throw new Error("priority is required");
@@ -33,7 +33,7 @@ const labTestOrdersService = {
 
             const order = await LabTestOrders.create(
                 {
-                    patient_id: data.patient_id,
+                    client_id: data.client_id,
                     encounter_id: data.encounter_id,
                     order_no: orderNo,
                     order_date: new Date(),
@@ -86,7 +86,7 @@ const labTestOrdersService = {
             limit = 10,
             search = "",
             status,
-            patient_id,
+            client_id,
             start_date,
             end_date,
             sort_by = "createdAt",
@@ -101,7 +101,7 @@ const labTestOrdersService = {
         }
 
         if (status) where.status = status;
-        if (patient_id) where.patient_id = patient_id;
+        if (client_id) where.client_id = client_id;
         if (start_date && end_date)
             where.order_date = { [Op.between]: [new Date(start_date), new Date(end_date)] };
 
@@ -111,7 +111,7 @@ const labTestOrdersService = {
             limit: Number(limit),
             order: [[sort_by, sort_order]],
             include: [
-                { model: Patient, as: "patient" },
+                { model: Client, as: "client" },
                 { model: Encounter, as: "encounter" },
                 {
                     model: LabTestOrderItems,
@@ -135,7 +135,7 @@ const labTestOrdersService = {
     async getById(id) {
         const order = await LabTestOrders.findByPk(id, {
             include: [
-                { model: Patient, as: "patient" },
+                { model: Client, as: "client" },
                 { model: Encounter, as: "encounter" },
                 {
                     model: LabTestOrderItems,
@@ -153,7 +153,7 @@ const labTestOrdersService = {
         const order = await LabTestOrders.findOne({
             where: { encounter_id: id },
             include: [
-                { model: Patient, as: "patient" },
+                { model: Client, as: "client" },
                 { model: Encounter, as: "encounter" },
                 {
                     model: LabTestOrderItems,
@@ -251,7 +251,7 @@ const labTestOrdersService = {
             // Return updated order with items
             const updatedOrder = await LabTestOrders.findByPk(id, {
                 include: [
-                    { model: Patient, as: "patient" },
+                    { model: Client, as: "client" },
                     { model: Encounter, as: "encounter" },
                     {
                         model: LabTestOrderItems,
@@ -288,13 +288,13 @@ const labTestOrdersService = {
     },
 
     /**
-     * ✅ Get All Lab Test Orders by Patient ID
+     * ✅ Get All Lab Test Orders by Client ID
      */
-    async getByPatient(patient_id) {
-        if (!patient_id) throw new Error("patient_id is required");
+    async getByClient(client_id) {
+        if (!client_id) throw new Error("client_id is required");
 
         const orders = await LabTestOrders.findAll({
-            where: { patient_id },
+            where: { client_id },
             order: [["createdAt", "DESC"]],
             include: [
                 { model: Encounter, as: "encounter" },
@@ -317,7 +317,7 @@ const labTestOrdersService = {
             where: { status: "pending" },
             order: [["createdAt", "DESC"]],
             include: [
-                { model: Patient, as: "patient" },
+                { model: Client, as: "client" },
                 { model: Encounter, as: "encounter" },
                 {
                     model: LabTestOrderItems,

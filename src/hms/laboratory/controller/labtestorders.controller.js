@@ -113,15 +113,15 @@ async getByEncounterId(req, res) {
   },
 
   /**
-   * ✅ Get Lab Test Orders by Patient
+   * ✅ Get Lab Test Orders by Client
    */
-  async getByPatient(req, res) {
+  async getByClient(req, res) {
     try {
-      const { patient_id } = req.params;
-      const orders = await labTestOrderService.getByPatient(patient_id);
-      return res.sendSuccess(orders, "Lab test orders fetched for patient successfully");
+      const { client_id } = req.params;
+      const orders = await labTestOrderService.getByClient(client_id);
+      return res.sendSuccess(orders, "Lab test orders fetched for client successfully");
     } catch (error) {
-      return res.sendError(error.message || "Failed to fetch lab test orders for patient");
+      return res.sendError(error.message || "Failed to fetch lab test orders for client");
     }
   },
 

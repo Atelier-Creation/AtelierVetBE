@@ -2,7 +2,7 @@ import Wards from "./wards.models.js";
 import Rooms from "./rooms.models.js";
 import Beds from "./beds.models.js";
 import Admissions from "./admissions.models.js";
-import Patients from "../../patients/models/patients.models.js";
+import Clients from "../../clients/models/clients.models.js";
 import User from "../../../user/models/user.model.js";
 import Bedtransfers from "./bedtransfers.models.js"; 
 
@@ -13,7 +13,7 @@ Beds.belongsTo(Rooms, { as: "room", foreignKey: "room_id" });
 Admissions.belongsTo(Wards, { as: "ward", foreignKey: "ward_id" });
 Admissions.belongsTo(Rooms, { as: "room", foreignKey: "room_id" });
 Admissions.belongsTo(Beds, { as: "bed", foreignKey: "bed_id" });
-Admissions.belongsTo(Patients, { as: "patient", foreignKey: "patient_id" });
+Admissions.belongsTo(Clients, { as: "client", foreignKey: "client_id" });
 
 // 👤 Two different user relations
 Admissions.belongsTo(User, { as: "admittedBy", foreignKey: "admitted_by" });

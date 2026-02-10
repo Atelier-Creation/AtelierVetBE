@@ -6,7 +6,7 @@ import Admissions from "../models/admissions.models.js";
 import Beds from "../models/beds.models.js";
 import Rooms from "../models/rooms.models.js";
 import Ward from "../models/wards.models.js";
-import Patient from "../../patients/models/patients.models.js";
+import Client from "../../clients/models/clients.models.js";
 import "../models/index.js"; // ensure associations are loaded
 
 const bedTransfersService = {
@@ -28,7 +28,7 @@ const bedTransfersService = {
       if (!admission) throw new Error("Admission not found");
 
       if (admission.status === "discharged")
-        throw new Error("Cannot transfer. Patient is already discharged");
+        throw new Error("Cannot transfer. Client is already discharged");
 
       // Ensure from_bed matches current admission bed
       if (String(admission.bed_id) !== String(data.from_bed_id)) {
@@ -99,7 +99,7 @@ const bedTransfersService = {
             model: Admissions,
             as: "admission",
             include: [
-              { model: Patient, as: "patient" },
+              { model: Client, as: "client" },
               { model: Rooms, as: "room" },
               { model: Ward, as: "ward" },
             ],
@@ -126,7 +126,7 @@ const bedTransfersService = {
       limit = 10,
       search = "",
       admission_id,
-      patient_id,
+      client_id,
       status,
       sort_by = "createdAt",
       sort_order = "DESC",
@@ -148,18 +148,18 @@ const bedTransfersService = {
         {
           model: Admissions,
           as: "admission",
-          include: [{ model: Patient, as: "patient" }],
+          include: [{ model: Client, as: "client" }],
         },
         { model: Beds, as: "fromBed", include: [{ model: Rooms, as: "room" }] },
         { model: Beds, as: "toBed", include: [{ model: Rooms, as: "room" }] },
       ],
     });
 
-    // If patient_id filter provided, filter on included admission.patient
+    // If client_id filter provided, filter on included admission.client
     let filteredRows = rows;
     let filteredCount = count;
-    if (patient_id) {
-      filteredRows = rows.filter((r) => r.admission?.patient_id === patient_id);
+    if (client_id) {
+      filteredRows = rows.filter((r) => r.admission?.client_id === client_id);
       filteredCount = filteredRows.length;
     }
 
@@ -180,7 +180,7 @@ const bedTransfersService = {
         {
           model: Admissions,
           as: "admission",
-          include: [{ model: Patient, as: "patient" }, { model: Rooms, as: "room" }, { model: Ward, as: "ward" }],
+          include: [{ model: Client, as: "client" }, { model: Rooms, as: "room" }, { model: Ward, as: "ward" }],
         },
         { model: Beds, as: "fromBed", include: [{ model: Rooms, as: "room" }] },
         { model: Beds, as: "toBed", include: [{ model: Rooms, as: "room" }] },

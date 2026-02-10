@@ -6,7 +6,7 @@ export const registerSchema = {
     email: z.string().email(),
     password: z.string().min(6).max(255),
     phone: z.string().regex(/^\d{10}$/),
-    role: z.enum(["Super Admin", "Admin", "Doctor", "Patient", "Nurse", "Receptionist", "Pharmacist", "Lab Technician", "Accountant"]),
+    role: z.enum(["Super Admin", "Admin", "Doctor", "Client", "Nurse", "Receptionist", "Pharmacist", "Lab Technician", "Accountant"]),
   }),
 };
 
@@ -31,7 +31,7 @@ export const updateUserSchema = {
     username: z.string().min(3).max(50).optional(),
     email: z.string().email().optional(),
     phone: z.string().regex(/^\d{10}$/).optional(),
-    role: z.enum(["Super Admin", "Admin", "Doctor", "Patient", "Nurse", "Receptionist", "Pharmacist", "Lab Technician", "Accountant"]).optional(),
+    role: z.enum(["Super Admin", "Admin", "Doctor", "Client", "Nurse", "Receptionist", "Pharmacist", "Lab Technician", "Accountant"]).optional(),
   }),
 };
 

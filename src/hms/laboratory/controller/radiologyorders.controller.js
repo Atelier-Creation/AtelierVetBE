@@ -99,15 +99,15 @@ const radiologyOrderController = {
   },
 
   /**
-   * ✅ Get Radiology Orders by Patient
+   * ✅ Get Radiology Orders by Client
    */
-  async getByPatient(req, res) {
+  async getByClient(req, res) {
     try {
-      const { patient_id } = req.params;
-      const orders = await radiologyOrderService.getByPatient(patient_id);
-      return res.sendSuccess(orders, "Radiology orders fetched for patient successfully");
+      const { client_id } = req.params;
+      const orders = await radiologyOrderService.getByClient(client_id);
+      return res.sendSuccess(orders, "Radiology orders fetched for client successfully");
     } catch (error) {
-      return res.sendError(error.message || "Failed to fetch radiology orders for patient");
+      return res.sendError(error.message || "Failed to fetch radiology orders for client");
     }
   },
 

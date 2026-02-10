@@ -1,61 +1,39 @@
 import { Op } from "sequelize";
 import { sequelize } from "../../../db/index.js";
 import Encounters from "../models/encounters.models.js";
-import Patient from "../../patients/models/patients.models.js";
+import Client from "../../clients/models/clients.models.js";
 import Doctor from "../../staff/models/doctor.models.js";
 import Appointment from "../../appointments/models/appointments.models.js";
-import "../models/index.js";
-import { v4 as uuidv4 } from "uuid";
 
 const encountersService = {
-    /**
-     * ✅ Generate unique encounter number
-     */
-    async generateEncounterNo() {
-        const lastEncounter = await Encounters.findOne({
-            order: [["createdAt", "DESC"]],
-        });
-
-        let counter = 1;
-        if (lastEncounter && lastEncounter.encounter_no) {
-            const lastNo = parseInt(lastEncounter.encounter_no.split("-")[1] || "0");
-            counter = lastNo + 1;
-        }
-
-        return `ENC-${String(counter).padStart(5, "0")}`;
-    },
-
     /**
      * ✅ Create Encounter
      */
     async create(data, user) {
         try {
-            // ✅ If appointment_id is provided, fetch doctor_id & patient_id automatically
+            // ✅ If appointment_id is provided, fetch doctor_id & client_id automatically
             if (data.appointment_id) {
                 const appointment = await Appointment.findOne({
                     where: { id: data.appointment_id },
-                    attributes: ["doctor_id", "patient_id", "status"],
+                    attributes: ["doctor_id", "client_id", "status"],
                 });
 
                 if (!appointment) {
-                    throw new Error("Invalid appointment_id — appointment not found");
+                    throw new Error("Appointment not found");
                 }
 
-                // ✅ Check if appointment status is Pending
-                if (appointment.status !== "Pending") {
-                    throw new Error(
-                        `Cannot create encounter. Appointment is already '${appointment.status}'`
-                    );
+                if (appointment.status === "Cancelled") {
+                    throw new Error("Cannot create encounter for a cancelled appointment");
                 }
 
-                // Auto-fill doctor_id & patient_id
+                // Auto-fill doctor_id & client_id
                 data.doctor_id = appointment.doctor_id;
-                data.patient_id = appointment.patient_id;
+                data.client_id = appointment.client_id;
             }
 
             // ✅ Required field validation (after autofill)
             const requiredFields = [
-                "patient_id",
+                "client_id",
                 "doctor_id",
                 "encounter_date",
                 "chief_complaint",
@@ -65,47 +43,45 @@ const encountersService = {
             ];
 
             for (const field of requiredFields) {
-                if (!data[field]) throw new Error(`${field} is required`);
+                if (!data[field]) {
+                    throw new Error(`${field} is required`);
+                }
             }
 
-            // ✅ Generate Encounter No
-            const encounter_no = await this.generateEncounterNo();
+            // ✅ Generate unique encounter number
+            const count = await Encounters.count();
+            const encounterNo = `ENC-${String(count + 1).padStart(5, "0")}`;
 
-            // ✅ Create encounter record
+            // ✅ Create encounter
             const encounter = await Encounters.create({
-                id: uuidv4(),
-                encounter_no,
                 ...data,
+                encounter_no: encounterNo,
+                status: data.status || "Open",
                 created_by: user?.id || null,
-                created_by_name: user?.username || null,
+                created_by_name: user?.name || null,
                 created_by_email: user?.email || null,
             });
 
-            // ✅ Update appointment status to Completed
-            if (data.appointment_id) {
-                await Appointment.update(
-                    { status: "Completed" },
-                    { where: { id: data.appointment_id } }
-                );
-            }
-
             return encounter;
         } catch (error) {
-            console.error("❌ Error creating encounter:", error.message);
-            throw error;
+            console.error("❌ Error creating encounter:", error);
+            throw new Error(error.message || "Failed to create encounter");
         }
     },
 
-
+    /**
+     * ✅ Get All Encounters (with filters & pagination)
+     */
     async getAll(options = {}) {
         const {
             page = 1,
             limit = 10,
             search = "",
+            status,
             start_date,
             end_date,
             doctor_id,
-            patient_id,
+            client_id,
             sort_by = "createdAt",
             sort_order = "DESC",
         } = options;
@@ -113,12 +89,15 @@ const encountersService = {
         const where = {};
 
         if (doctor_id) where.doctor_id = doctor_id;
-        if (patient_id) where.patient_id = patient_id;
+        if (client_id) where.client_id = client_id;
+
         if (start_date && end_date) {
             where.encounter_date = {
                 [Op.between]: [new Date(start_date), new Date(end_date)],
             };
         }
+
+        if (status) where.status = status;
 
         if (search) {
             where[Op.or] = [
@@ -133,9 +112,9 @@ const encountersService = {
             where,
             include: [
                 {
-                    model: Patient,
-                    as: "patient",
-                    attributes: ["id", "first_name", "last_name", "patient_code"],
+                    model: Client,
+                    as: "client",
+                    attributes: ["id", "first_name", "last_name", "client_code"],
                 },
                 {
                     model: Doctor,
@@ -168,9 +147,9 @@ const encountersService = {
         const encounter = await Encounters.findByPk(id, {
             include: [
                 {
-                    model: Patient,
-                    as: "patient",
-                    attributes: ["id", "first_name", "last_name", "patient_code"],
+                    model: Client,
+                    as: "client",
+                    attributes: ["id", "first_name", "last_name", "client_code"],
                 },
                 {
                     model: Doctor,
@@ -185,16 +164,10 @@ const encountersService = {
             ],
         });
 
-        if (!encounter) throw new Error("Encounter not found");
-        return encounter;
-    },
+        if (!encounter) {
+            throw new Error("Encounter not found");
+        }
 
-    
-
-    async getEncounterbyadmmisionID(id) {
-        const encounter = await Encounters.findOne({
-            where: { appointment_id: id },
-        });
         return encounter;
     },
 
@@ -203,12 +176,15 @@ const encountersService = {
      */
     async update(id, data, user) {
         const encounter = await Encounters.findByPk(id);
-        if (!encounter) throw new Error("Encounter not found");
+
+        if (!encounter) {
+            throw new Error("Encounter not found");
+        }
 
         await encounter.update({
             ...data,
             updated_by: user?.id || null,
-            updated_by_name: user?.username || null,
+            updated_by_name: user?.name || null,
             updated_by_email: user?.email || null,
         });
 
@@ -216,25 +192,23 @@ const encountersService = {
     },
 
     /**
-     * ✅ Delete (Soft Delete or Hard Delete based on flag)
+     * ✅ Delete (Soft Delete) Encounter
      */
-    async delete(id, user, hardDelete = false) {
+    async delete(id, user) {
         const encounter = await Encounters.findByPk(id);
-        if (!encounter) throw new Error("Encounter not found");
 
-        if (hardDelete) {
-            await encounter.destroy();
-            return { message: "Encounter permanently deleted" };
+        if (!encounter) {
+            throw new Error("Encounter not found");
         }
 
         await encounter.update({
             status: "Cancelled",
             deleted_by: user?.id || null,
-            deleted_by_name: user?.username || null,
+            deleted_by_name: user?.name || null,
             deleted_by_email: user?.email || null,
         });
 
-        return { message: "Encounter cancelled successfully" };
+        return { message: "Encounter deleted successfully" };
     },
 };
 

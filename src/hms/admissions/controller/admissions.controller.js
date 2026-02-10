@@ -25,9 +25,9 @@ const admissionsController = {
 
       const result = await admissionsService.create(admissionData, req.user);
 
-      return res.sendSuccess(result, "Patient admitted successfully");
+      return res.sendSuccess(result, "Client admitted successfully");
     } catch (error) {
-      return res.sendError(error.message || "Failed to admit patient");
+      return res.sendError(error.message || "Failed to admit client");
     }
   },
 
@@ -80,7 +80,7 @@ const admissionsController = {
   },
 
   /**
-   * ✅ Discharge Patient
+   * ✅ Discharge Client
    */
   async discharge(req, res) {
     try {
@@ -96,9 +96,9 @@ const admissionsController = {
       };
 
       const result = await admissionsService.discharge(id, dischargeData);
-      return res.sendSuccess(result, "Patient discharged successfully");
+      return res.sendSuccess(result, "Client discharged successfully");
     } catch (error) {
-      return res.sendError(error.message || "Failed to discharge patient");
+      return res.sendError(error.message || "Failed to discharge client");
     }
   },
 

@@ -41,9 +41,9 @@ router.patch(
 );
 
 router.get(
-  "/radiologyorder/patient/:patient_id",
+  "/radiologyorder/client/:client_id",
   verifyToken(),
-  radiologyOrderController.getByPatient
+  radiologyOrderController.getByClient
 );
 
 router.get(

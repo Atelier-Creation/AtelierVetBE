@@ -3,7 +3,7 @@ import { Op, QueryTypes } from "sequelize";
 import Billing from "../../../ims/billing/models/billing.models.js";
 import Appointments from "../../appointments/models/appointments.models.js";
 import Doctor from "../../staff/models/doctor.models.js";
-import Patient from "../../patients/models/patients.models.js";
+import Client from "../../clients/models/clients.models.js";
 import LabTestsMaster from "../../laboratory/models/labtestsmaster.models.js";
 import LabTestOrderItems from "../../laboratory/models/labtestordersiteams.models.js";
 import Addmissions from "../../admissions/models/admissions.models.js";
@@ -51,7 +51,7 @@ const adminDashboardService = {
             // ---------- 4) Total Revenue ----------
             const totalRevenue = doctorRevenue + labRevenue + pharmacyRevenue;
 
-            // ---------- 5) Admitted Patients Day-wise (From admissions table) ----------
+            // ---------- 5) Admitted Clients Day-wise (From admissions table) ----------
             const admittedDayWiseRes = await sequelize.query(
                 `
   WITH RECURSIVE date_series AS (
@@ -80,14 +80,14 @@ const adminDashboardService = {
                 date: r.day,
                 count: Number(r.count),
             }));
-            // ---------- 6) Recent Admitted Patients (From admissions table) ----------
+            // ---------- 6) Recent Admitted Clients (From admissions table) ----------
             const recentAdmitted = await Addmissions.findAll({
                 where: {
                     [Op.and]: [
                         sequelize.where(sequelize.fn("LOWER", sequelize.col("status")), {
                             [Op.in]: [
                                 "admitted",
-                                "inpatient",
+                                "inClient",
                                 "admitted - in ward",
                                 "discharged",
                                 "transferred",
@@ -95,7 +95,7 @@ const adminDashboardService = {
                         }),
                     ],
                 },
-                include: [{ model: Patient, as: "patient" }],
+                include: [{ model: Client, as: "client" }],
                 order: [["admission_date", "DESC"]],
                 limit: 5,
             });

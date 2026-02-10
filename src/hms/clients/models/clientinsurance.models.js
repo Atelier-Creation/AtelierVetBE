@@ -1,72 +1,48 @@
 import { sequelize } from "../../../db/index.js";
 import { DataTypes } from "sequelize";
 
-const Patients = sequelize.define(
-    "Patients",
+const ClientInsurance = sequelize.define(
+    "ClientInsurance",
     {
         id: {
             type: DataTypes.UUID,
             defaultValue: DataTypes.UUIDV4,
             primaryKey: true,
         },
-        first_name: {
-            type: DataTypes.STRING(100),
-            allowNull: false,
-        },
-        last_name: {
-            type: DataTypes.STRING(100),
-            allowNull: false,
-        },
-        patient_code: {
-            type: DataTypes.STRING(100),
-            allowNull: false,
-            unique: true,
-        },
-        user_id: {
+        client_id: {
             type: DataTypes.UUID,
             allowNull: false,
             references: {
-                model: "endusers",
+                model: "clients",
                 key: "id",
             },
             onUpdate: "CASCADE",
             onDelete: "CASCADE",
         },
-        email: {
+        provider_name: {
             type: DataTypes.STRING(100),
             allowNull: false,
         },
-        phone: {
-            type: DataTypes.STRING(15),
-            allowNull: true,
-        },
-        gender:{
-            type: DataTypes.ENUM('Male', 'Female'),
+        policy_number: {
+            type: DataTypes.STRING(100),
             allowNull: false,
         },
-        dob:{
+        coverage_details: {
+            type: DataTypes.STRING(255),
+            allowNull: false,
+        },
+        valid_from:{
             type: DataTypes.DATE,
             allowNull: false,
         },
-        age: {
-            type: DataTypes.INTEGER,
+        valid_to:{
+            type: DataTypes.DATE,
             allowNull: false,
         },
-        address:{
-            type: DataTypes.STRING(255),
+        is_primary: {
+            type: DataTypes.BOOLEAN,
+            defaultValue: false,
             allowNull: false,
-        },
-        blood_group:{
-            type: DataTypes.ENUM('A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'),
-            allowNull: false,
-        },
-        marital_status:{
-            type: DataTypes.ENUM('Single', 'Married'),
-            allowNull: false,
-        },
-        notes:{
-            type: DataTypes.STRING(255),
-            allowNull: true,
         },
         is_active: {
             type: DataTypes.BOOLEAN,
@@ -86,9 +62,9 @@ const Patients = sequelize.define(
         deleted_by_email: { type: DataTypes.STRING, allowNull: true },
     },
     {
-        tableName: "patients",
+        tableName: "client_insurance",
         timestamps: true,
     }
 );
 
-export default Patients;
+export default ClientInsurance;

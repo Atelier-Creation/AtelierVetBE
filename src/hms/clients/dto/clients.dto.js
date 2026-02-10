@@ -1,7 +1,7 @@
 import { z } from "zod";
 
-// ✅ Create Patient Schema
-export const createPatientSchema = z.object({
+// ✅ Create Client Schema
+export const createClientSchema = z.object({
   first_name: z
     .string({ required_error: "First name is required" })
     .min(2, "First name must be at least 2 characters")
@@ -60,8 +60,8 @@ export const createPatientSchema = z.object({
   created_by_email: z.string().email().optional(),
 });
 
-// ✅ Update Patient Schema
-export const updatePatientSchema = z.object({
+// ✅ Update Client Schema
+export const updateClientSchema = z.object({
   first_name: z.string().min(2).max(100).optional(),
   last_name: z.string().min(2).max(100).optional(),
   email: z.string().email().max(100).optional(),

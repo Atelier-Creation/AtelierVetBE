@@ -2,10 +2,10 @@ import { z } from "zod";
 
 // ✅ Create Encounter Schema
 export const createEncounterSchema = z.object({
-  appointment_id: z.string().uuid().optional(), // optional — can auto-fill doctor & patient if given
+  appointment_id: z.string().uuid().optional(), // optional — can auto-fill doctor & client if given
 
-  patient_id: z
-    .string({ required_error: "Patient ID is required" })
+  client_id: z
+    .string({ required_error: "Client ID is required" })
     .uuid("Invalid UUID format")
     .optional(), // optional if appointment_id is provided
 
@@ -47,7 +47,7 @@ export const createEncounterSchema = z.object({
 // ✅ Update Encounter Schema
 export const updateEncounterSchema = z.object({
   appointment_id: z.string().uuid().optional(),
-  patient_id: z.string().uuid().optional(),
+  client_id: z.string().uuid().optional(),
   doctor_id: z.string().uuid().optional(),
 
   encounter_date: z

@@ -63,12 +63,12 @@ router.patch(
 );
 
 /**
- * ✅ Get Lab Test Orders by Patient
+ * ✅ Get Lab Test Orders by Client
  */
 router.get(
-  "/labtestorder/patient/:patient_id",
+  "/labtestorder/client/:client_id",
   verifyToken(),
-  labTestOrderController.getByPatient
+  labTestOrderController.getByClient
 );
 
 router.get(
